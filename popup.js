@@ -39,6 +39,7 @@ xhr.onreadystatechange = function() {
 	document.querySelector("#details").appendChild(template);
 
 	document.body.classList.add("details");
+
 };
 
 xhr.send();
