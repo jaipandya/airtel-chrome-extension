@@ -10,11 +10,11 @@ xhr.onreadystatechange = function() {
 		return;
 	}
 
-	var div = document.createElement("div");
-	div.innerHTML = xhr.responseText;
-
-	var ul = div.querySelector("#container .content ul");
-	var items = Array.prototype.slice.apply(ul.getElementsByTagName("li"));
+	var responseText = xhr.responseText,
+		parser = new DOMParser();
+		doc = parser.parseFromString(responseText , "text/html"),
+		ul = doc.querySelector("#container .content ul"),
+		items = Array.prototype.slice.apply(ul.getElementsByTagName("li"));
 
 	items = items.map(function(item) {
 		return item.innerText.split(":")[1].trim();

@@ -1,4 +1,7 @@
-alarmInfo = {
+var ALERT_PERCENT_CONSUMPTION = 70;
+
+// Creating alarm for event page
+var alarmInfo = {
 	delayInMinutes: 0.1, 
 	periodInMinutes: 17280
 }
@@ -14,11 +17,12 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 		if(xhr.status != 200) {
 			return;
 		}
-	
-		var div = document.createElement("div");
-		div.innerHTML = xhr.responseText;
-	
-		var ul = div.querySelector("#container .content ul");
+
+		var responseText = xhr.responseText;
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(responseText , "text/html");
+		
+		var ul = doc.querySelector("#container .content ul");
 		var items = Array.prototype.slice.apply(ul.getElementsByTagName("li"));
 	
 		items = items.map(function(item) {
@@ -29,16 +33,17 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
 			total = parseFloat(items[2]),
 			remainingDays = items[3];
 	
-		// Sending notifications if GB left is less than 20%
-		percentage = Math.round((remaining / total) * 100)
-		if (percentage < 20) {
-			id = null;
+		// Sending notifications consumed more than the set limit above
+		var percentage = Math.round(((total - remaining) / total) * 100)
+		if (percentage > ALERT_PERCENT_CONSUMPTION) {
 			var notificationOption = {
-				type: "basic",
+				type: "progress",
 				title: "Broadband Usage Alert",
-				message: "Only " + percentage + " percent quota remaining",
-				iconUrl: "airtel_16.png"
+				message: "You have consumed " + percentage + " percent bandwidth from your quota",
+				iconUrl: "airtel_16.png",
+				progress: percentage
 			};
+			// Sending notification
 			chrome.notifications.create("", notificationOption, function(id){});
 		}
 	
